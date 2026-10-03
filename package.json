@@ -9,11 +9,12 @@
     "dev": "bun --bun vite --host 127.0.0.1",
     "typecheck": "bun --bun tsc --noEmit",
     "build": "bun run typecheck && bun --bun vite build",
+    "test": "bun test",
     "preview": "bun --bun vite preview --host 127.0.0.1",
     "prepare:model": "bun scripts/prepare-model.ts",
     "verify:model": "bun scripts/verify-model.ts",
-    "format": "bun --bun prettier --write src scripts vite.config.ts tsconfig.json package.json",
-    "format:check": "bun --bun prettier --check src scripts vite.config.ts tsconfig.json package.json"
+    "format": "bun --bun prettier --write src scripts tests vite.config.ts tsconfig.json package.json",
+    "format:check": "bun --bun prettier --check src scripts tests vite.config.ts tsconfig.json package.json"
   },
   "dependencies": {
     "@fontsource-variable/dm-sans": "5.3.0",

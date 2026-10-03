@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type RefObject } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import {
   Box3,
+  Color,
   Group,
   Mesh,
   MeshStandardMaterial,
@@ -13,7 +14,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { RotateCcw, Box, AlertCircle } from 'lucide-react'
 import SceneCanvas from './SceneCanvas'
-import { byId, structures, type View } from './anatomy'
+import { byId, emphasis, structures, type View } from './anatomy'
 import manifest from '../public/models/manifest.json'
 
 export type ViewerHandle = {
@@ -93,7 +94,9 @@ function CameraControls({
     controls.addEventListener('end', end)
     const aspect = size.width / size.height
     const angle = ((camera as PerspectiveCamera).fov * Math.PI) / 360
-    const distance = (radius / Math.sin(Math.atan(Math.tan(angle) * Math.min(aspect, 1)))) * 1.05
+    // The bounding sphere is loose around the heart's silhouette, so frame a
+    // little inside it; every preset still clears the stage edges.
+    const distance = (radius / Math.sin(Math.atan(Math.tan(angle) * Math.min(aspect, 1)))) * 0.8
     const preset = (view: View) => {
       interacting = false
       // reset() clears residual damping before assigning a deterministic view.
@@ -155,6 +158,17 @@ function CameraControls({
   return null
 }
 
+const stageTone = new Color('#e4e3dc')
+const ghosts = new Map<string, string>()
+function ghostColor(color: string) {
+  let value = ghosts.get(color)
+  if (!value) {
+    value = '#' + new Color(color).lerp(stageTone, 0.5).getHexString()
+    ghosts.set(color, value)
+  }
+  return value
+}
+
 function Model({
   model,
   selected,
@@ -170,10 +184,15 @@ function Model({
       if (!structure) return
       object.visible = !hidden.has(id)
       const material = object.material as MeshStandardMaterial
-      material.color.set(structure.color)
-      material.emissive.set(selected === id ? '#914922' : '#000000')
-      material.emissiveIntensity = selected === id ? 0.24 : 0
+      const state = emphasis(id, selected)
+      material.color.set(state === 'ghosted' ? ghostColor(structure.color) : structure.color)
+      material.emissive.set(state === 'selected' ? structure.color : '#000000')
+      material.emissiveIntensity = state === 'selected' ? 0.35 : 0
+      material.transparent = state === 'ghosted'
+      material.opacity = state === 'ghosted' ? 0.22 : 1
+      material.depthWrite = state !== 'ghosted'
       material.roughness = 0.58
+      material.needsUpdate = true
     })
     invalidate()
   }, [model, selected, hidden, invalidate])

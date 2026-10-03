@@ -21,6 +21,7 @@ Open **http://127.0.0.1:5173**. Run all commands from this repository. Vite runs
 
 ```sh
 bun run typecheck       # TypeScript checks, including conversion scripts
+bun run test            # Unit tests for selection emphasis
 bun run verify:model    # Check the GLB hash, source IDs, and valid geometry
 bun run build           # Typecheck and create dist/
 bun run preview         # Serve the production build at http://127.0.0.1:4173

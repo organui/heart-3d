@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
 import {
   Activity,
   ArrowLeft,
@@ -40,6 +40,7 @@ export default function App() {
   const focusPanel = useRef(false)
   const structureList = useRef<HTMLDivElement>(null)
   const selectedRow = useRef<HTMLLIElement>(null)
+  const [listEdges, setListEdges] = useState({ above: false, below: false })
   const current = selected ? byId[selected] : null
   const visibleCount = structures.length - hidden.size
   const matches = structures.filter((s) =>
@@ -56,6 +57,24 @@ export default function App() {
     if (item.top < bounds.top) list.scrollTop += item.top - bounds.top
     else if (item.bottom > bounds.bottom) list.scrollTop += item.bottom - bounds.bottom
   }, [selected, query, step, sidebarOpen])
+
+  function measureList() {
+    const list = structureList.current
+    if (!list) return
+    const above = list.scrollTop > 2
+    const below = list.scrollTop + list.clientHeight < list.scrollHeight - 2
+    setListEdges((edges) =>
+      edges.above === above && edges.below === below ? edges : { above, below },
+    )
+  }
+  useEffect(() => {
+    const list = structureList.current
+    if (!list) return
+    const observer = new ResizeObserver(measureList)
+    observer.observe(list)
+    measureList()
+    return () => observer.disconnect()
+  }, [sidebarOpen, query])
 
   useLayoutEffect(() => {
     if (!sidebarOpen || !focusPanel.current) return
@@ -306,7 +325,12 @@ export default function App() {
               </button>
             )}
           </div>
-          <div className="structure-list" aria-label="Heart structures" ref={structureList}>
+          <div
+            className={`structure-list ${listEdges.above ? 'more-above' : ''} ${listEdges.below ? 'more-below' : ''}`}
+            aria-label="Heart structures"
+            ref={structureList}
+            onScroll={measureList}
+          >
             {groups.map((group) => {
               const items = matches.filter((s) => s.group === group)
               if (!items.length) return null
@@ -381,7 +405,7 @@ export default function App() {
                       ? 'This cavity is hidden. Show structure to reveal it.'
                       : hidden.has('ventricular-wall')
                         ? 'Cavity surface visible. It represents chamber space, not tissue.'
-                        : 'Inside the ventricular wall. Isolate to see the cavity.'}
+                        : 'Shown through the ventricular wall. It represents chamber space, not tissue.'}
                   </p>
                 )}
                 <div className="detail-actions">
