@@ -46,6 +46,17 @@ Interactive checks used the Codex in-app Chromium browser. The minimal layout up
 
 Failure injections were local and temporary. They are not present in the delivered source. An early test revealed that Fiber's asynchronous default Canvas initialization could reject outside its error boundary; the app now owns renderer initialization, catches that failure, and cleans up its canvas, renderer, listeners, and resize observer.
 
+## Polish pass, 3 October 2026
+
+Re-checked in headless Chromium (SwiftShader WebGL) at 1440 × 900, 390 × 844 and 360 × 740 with no horizontal overflow.
+
+- Selection: the selected structure keeps its color with a slight glow while the rest turn translucent and pale, so posterior and internal structures (left atrium, ventricular cavities) are visible from any view. Previously the selection added a faint tint that was invisible on these warm colors.
+- Framing: every preset frames the heart about a third larger; anterior, posterior and left lateral views still clear the stage edges on desktop and phones.
+- Rendering: the scene drew continuously when idle because resize reconfiguration reset Fiber's frame loop to `always`. It now stays on demand; draw calls stop once the camera settles.
+- Panel: the structure list fades at whichever edge has more rows, so a clipped list reads as scrollable. On phones the list scrolls on its own so the details card is visible right after selecting.
+- Text: 7–9 px labels (tour eyebrow, detail eyebrow, review note, footer, status) raised to 9–11 px.
+- `bun run test` (2 tests), `bun run typecheck`, `bun run build` and `bun run format:check` passed. Before/after captures are in [screenshots/polish](screenshots/polish); [desktop](screenshots/desktop.png) and [mobile](screenshots/mobile.png) were replaced with current captures.
+
 ## Visual artifacts
 
 - [Desktop](screenshots/desktop.png)
@@ -73,3 +84,7 @@ Vite emits an advisory for the Three.js/Fiber chunk (about 793 kB minified, 209 
 7. Use Tab/Enter and Escape for controls and credits. Review the in-app source notes.
 
 Use a separate local checkout for destructive test fixtures. Do not remove the runtime asset from a shared running demo or publish failure-injection code.
+
+## Cross-explorer consistency pass (10 October 2026)
+
+Selection, framing and the anatomy panel now behave the same in all five OrganUI explorers (brain, heart, kidneys, liver, lungs), using the heart explorer as the reference. A selection lifts the chosen structure in its own color and ghosts the rest to 22% opacity, toned toward the canvas. Every named view is framed by `src/framing.ts`, which fits sampled surface points to the view at a shared 80% fill. The panel starts closed, opens from the header Anatomy button with focus moved into it, and Escape closes it and returns focus to that button. Checked in headless Chromium (SwiftShader WebGL) at 1440×900 and 390×844, with typecheck, tests and build passing.

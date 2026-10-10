@@ -167,3 +167,12 @@ export const tour: { id: string; title: string; text: string; view: View; isolat
     view: 'Anterior',
   },
 ]
+
+export type Emphasis = 'normal' | 'selected' | 'ghosted'
+// With nothing selected every structure keeps its own color. A selection
+// keeps its structure solid and ghosts the rest so it stays visible even
+// when it sits behind or inside other geometry (left atrium, cavities).
+export function emphasis(id: string, selected: string | null): Emphasis {
+  if (!selected) return 'normal'
+  return id === selected ? 'selected' : 'ghosted'
+}
