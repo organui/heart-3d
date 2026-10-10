@@ -84,3 +84,7 @@ Vite emits an advisory for the Three.js/Fiber chunk (about 793 kB minified, 209 
 7. Use Tab/Enter and Escape for controls and credits. Review the in-app source notes.
 
 Use a separate local checkout for destructive test fixtures. Do not remove the runtime asset from a shared running demo or publish failure-injection code.
+
+## Cross-explorer consistency pass (10 October 2026)
+
+Selection, framing and the anatomy panel now behave the same in all five OrganUI explorers (brain, heart, kidneys, liver, lungs), using the heart explorer as the reference. A selection lifts the chosen structure in its own color and ghosts the rest to 22% opacity, toned toward the canvas. Every named view is framed by `src/framing.ts`, which fits sampled surface points to the view at a shared 80% fill. The panel starts closed, opens from the header Anatomy button with focus moved into it, and Escape closes it and returns focus to that button. Checked in headless Chromium (SwiftShader WebGL) at 1440×900 and 390×844, with typecheck, tests and build passing.
