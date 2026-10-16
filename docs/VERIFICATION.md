@@ -75,7 +75,7 @@ No screen reader was used to test the tree. [Anatomy tree](screenshots/anatomy.p
 
 ## Anatomy tree options, 16 October 2026
 
-The registry `anatomy-tree` was reinstalled from organui PR #12 (commit d6b36d0, served locally; see the [integration record](REGISTRY_INTEGRATION.md)) to use its new `color`, `selectable`, and reveal behaviour. Checked against a production build in headless Chromium (Playwright 1.56, SwiftShader WebGL) at 1440 × 900 and 390 × 844:
+The registry `anatomy-tree` was reinstalled from organui PR #12 (commit b8e6451, served locally; see the [integration record](REGISTRY_INTEGRATION.md)) to use its new `color`, `selectable`, and reveal behaviour. Checked against a production build in headless Chromium (Playwright 1.56, SwiftShader WebGL) at 1440 × 900 and 390 × 844:
 
 - All 11 structure rows show a swatch whose computed colour equals the structure's mesh colour; the 4 group rows have no swatch and no `aria-selected`.
 - Clicking a group label, or pressing Enter on a focused group row, collapses/expands it and leaves the selection unchanged.

@@ -7,16 +7,16 @@ The anatomy panel uses the OrganUI registry item `anatomy-tree`, installed with 
 Reinstalled on 2026-10-16 (overwriting the earlier install from `master` commit 5e20c41):
 
 ```sh
-REGISTRY_URL=http://127.0.0.1:4411 bunx shadcn@4.21.0 add http://127.0.0.1:4411/anatomy-tree.json -y -o
+REGISTRY_URL=http://127.0.0.1:4412 bunx shadcn@4.21.0 add http://127.0.0.1:4412/anatomy-tree.json -y -o
 ```
 
-The install sandbox's network policy blocked `organui.com` and `ui.shadcn.com`. The item was therefore served from a local static server (`python3 -m http.server 4411`) holding the registry output built from the OrganUI repository at commit **d6b36d0**, the head of organui PR #12 (not merged when this was installed), plus shadcn's `colors/neutral.json` fetched from the shadcn GitHub repository. `REGISTRY_URL` points the CLI's own registry lookups at that server instead of `ui.shadcn.com`. With network access, the equivalent public command is `bunx shadcn@4.21.0 add https://organui.com/r/anatomy-tree.json -y -o`. That public artifact was not fetched for this install; once PR #12 is merged and published, the public item must be re-verified against the checksums below (or reinstalled from it).
+The install sandbox's network policy blocked `organui.com` and `ui.shadcn.com`. The item was therefore served from a local static server (`python3 -m http.server 4412`) holding the registry output built from the OrganUI repository at commit **b8e6451**, the head of organui PR #12 (not merged when this was installed), plus shadcn's `colors/neutral.json` fetched from the shadcn GitHub repository. `REGISTRY_URL` points the CLI's own registry lookups at that server instead of `ui.shadcn.com`. With network access, the equivalent public command is `bunx shadcn@4.21.0 add https://organui.com/r/anatomy-tree.json -y -o`. That public artifact was not fetched for this install; once PR #12 is merged and published, the public item must be re-verified against the checksums below (or reinstalled from it).
 
 | Artifact                                     | SHA-256                                                            |
 | -------------------------------------------- | ------------------------------------------------------------------ |
-| Served `anatomy-tree.json`                   | `32fbc477ece5f02ac135dbf0a5b4c059c37fc2ca9abc8982641b55c080cc9b30` |
-| Embedded `files[0].content`                  | `cb0ebd637b64a9813ba1139560315024b315580ad04e5df6eca3b3d1bb4844c0` |
-| Tracked `src/components/ui/anatomy-tree.tsx` | `dc14798adfbdcaef505cbe05e2ca92a6a3aae6164465d06e8d4d99cd415efab2` |
+| Served `anatomy-tree.json`                   | `719c1547afb1453e809ee1b2fca0dc99858083aa3ff712477a493c77e8f5f389` |
+| Embedded `files[0].content`                  | `14709d69270066ebb4677e736d71fa59c2ec9cf9c1f0e1a6a8236795633944cd` |
+| Tracked `src/components/ui/anatomy-tree.tsx` | `3d5554cdc179f1ad778fd6321cc1414c293c4cca0535efd9aab679c686893538` |
 
 The item declares `@base-ui/react@^1.8.0`. The CLI again wrote `^1.8.0` to `package.json`; it was changed back to the exact `1.8.0` to match this repository's exact pins, and `bun install` left the text `bun.lock` unchanged. Tailwind CSS and `@tailwindcss/vite` are pinned at 4.1.18, matching the kidney explorer.
 
@@ -73,7 +73,7 @@ No registry defect blocked the integration and the component was not modified. R
 1. The CLI loosened the exact dependency pin to `^1.8.0`; consumers with exact pins need to restore them.
 2. Search and expansion are internal. Clearing them needs a remount (Reset does this). A selection hidden by an active search query is not revealed, because reveal only expands ancestors.
 3. The search box has no placeholder or icon prop, so the visible label and the CSS search glyph carry that role.
-4. The built-in reveal calls `scrollIntoView({ block: "nearest" })`, which scrolls every scrollable ancestor, not just the tree. On phones, where the panel sits below the model, picking a structure in 3D while the panel is open scrolls the page down to the tree row (about 550 px at 390 x 844). Desktop is unaffected (the panel is in view). Scrolling only the tree's own container would avoid this; the app does not work around it.
+4. Resolved upstream in organui PR #12 commit b8e6451: the built-in reveal now scrolls only the tree's own scrolling container, so a 3D pick on a phone no longer jumps the page down to the tree. On phones the panel sits below the model, so the revealed row is in view once the user scrolls to the panel.
 5. Reveal runs only when `selectedId` changes, so a selection made while the tree is hidden is not scrolled into view when it is shown again (see Reveal above).
 
 Screen-reader testing of the tree was not done.
