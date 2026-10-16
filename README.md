@@ -21,7 +21,7 @@ Open **http://127.0.0.1:5173**. Run all commands from this repository. Vite runs
 
 ```sh
 bun run typecheck       # TypeScript checks, including conversion scripts
-bun run test            # Unit tests for selection emphasis
+bun run test            # Unit tests for selection emphasis, picking, and the anatomy-tree adapter
 bun run verify:model    # Check the GLB hash, source IDs, and valid geometry
 bun run build           # Typecheck and create dist/
 bun run preview         # Serve the production build at http://127.0.0.1:4173
@@ -35,10 +35,10 @@ The app is static and uses relative build paths. `dist/` can later be hosted on 
 - The heart opens centered on a neutral canvas. Expand **Anatomy** to browse structures; collapse it to return to the full-width view.
 - Drag to rotate; scroll or pinch to zoom. The gesture hint fades after the first rotation or zoom and stays hidden until the page reloads.
 - Open the camera view selector for anterior, posterior, and left lateral presets. Manual rotation changes its label to **Custom view**; zooming preserves the view name. Use arrow keys to navigate the menu, Enter to select, and Escape to close it.
-- Select a mesh or search the structure list by name, group, or FMA identifier. Selection, highlighting, and descriptions stay synchronized.
-- Isolate a structure, hide it, or restore all. **Reset explorer** restores the anterior camera, zoom, visibility, selection, search, and tour state.
+- Select a mesh or use the anatomy tree (the OrganUI registry `anatomy-tree` component). The tree searches structure and group labels; group rows expand/collapse and show or hide all their structures (showing **Mixed** when partly hidden). Selection is always a single structure; selection, highlighting, and descriptions stay synchronized. See [registry integration](docs/REGISTRY_INTEGRATION.md).
+- Isolate a structure, hide it, or restore all. **Reset explorer** restores the anterior camera, zoom, visibility, selection, tree search/expansion, and tour state.
 - Follow five guided stops, including an isolated ventricular cavity and the heart's coronary supply.
-- On mobile, **Anatomy** opens the list below the model; **View in 3D** closes it and returns to the heart. Selection and search survive closing/reopening the panel.
+- On mobile, **Anatomy** opens the tree below the model; **View in 3D** closes it and returns to the heart. Selection and search survive closing/reopening the panel.
 - Click a selected structure’s name above the canvas to open its details. Escape closes the anatomy panel and returns keyboard focus to its toggle.
 - Use Tab/Enter for controls. Focus the model and use arrow keys to rotate, `+`/`-` to zoom. The same anatomy information is available through ordinary text controls without WebGL. The credits dialog supports Escape and restores focus.
 - Reduced-motion preferences disable orbit damping and smooth scrolling. There is no automatic spinning or heartbeat animation. Rendering is on demand, with device pixel ratio capped at 2.
@@ -47,9 +47,11 @@ The app is static and uses relative build paths. `dist/` can later be hosted on 
 <details>
 <summary>Anatomy menu, mobile, and guided exploration screenshots</summary>
 
-![Borderless anatomy menu](docs/screenshots/anatomy.png)
+![Anatomy tree with the ventricular wall selected](docs/screenshots/anatomy.png)
 
 <img src="docs/screenshots/mobile.png" alt="Mobile heart explorer" width="300" />
+
+<img src="docs/screenshots/anatomy-mobile.png" alt="Mobile anatomy tree below the heart" width="300" />
 
 ![Guided exploration with an isolated ventricular cavity](docs/screenshots/guided-isolation.png)
 
@@ -72,7 +74,7 @@ Known limitations:
 - This is a simplified adult male reference model, not a complete or patient-specific heart. Vessel ends are truncated; colors are illustrative.
 - Valves, atrial cavities, most veins, pericardium, and surrounding organs are omitted. Coronary branches are grouped into left/right trees.
 - Source mappings can be incomplete. The intact ventricular wall was obtained from the IS-A hierarchy after the PART-OF ventricular wall concepts proved incomplete; the evidence is documented.
-- Browser checks used desktop Chromium and mobile viewport sizes, not physical iOS/Android devices or a screen-reader audit. Reduced-motion handling was reviewed in code; actual GPU context loss was not induced.
+- Browser checks used desktop Chromium and mobile viewport sizes, not physical iOS/Android devices or a screen-reader audit (including for the anatomy tree). Reduced-motion handling was reviewed in code; actual GPU context loss was not induced.
 - The Three.js/Fiber production chunk is about 793 kB before transfer compression (209 kB gzip). Vite reports a size advisory. The browser also emits a non-blocking upstream `THREE.Clock` deprecation warning from Fiber.
 
 ## Reproduce the model
@@ -90,6 +92,8 @@ This downloads the roughly 136 MiB source archive and mapping tables into ignore
 
 - `src/anatomy.ts`: reviewed source-ID mappings, explanatory text, and guided stops.
 - `src/App.tsx`: selection/visibility state and accessible interface controls.
+- `src/components/ui/anatomy-tree.tsx`: OrganUI registry component installed with the shadcn CLI; tracked unmodified and excluded from Prettier.
+- `src/anatomy-adapter.ts`: tree data, group/leaf mapping, and visibility conversion for this scene.
 - `src/Viewer.tsx`: streamed loading, model validation, mesh interaction, and camera controls.
 - `src/ViewMenu.tsx`: compact camera selector with keyboard navigation and focus handling.
 - `src/SceneCanvas.tsx`: renderer ownership, resize handling, and recoverable graphics failures.

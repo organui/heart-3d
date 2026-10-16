@@ -57,11 +57,28 @@ Re-checked in headless Chromium (SwiftShader WebGL) at 1440 × 900, 390 × 844 a
 - Text: 7–9 px labels (tour eyebrow, detail eyebrow, review note, footer, status) raised to 9–11 px.
 - `bun run test` (2 tests), `bun run typecheck`, `bun run build` and `bun run format:check` passed. Before/after captures are in [screenshots/polish](screenshots/polish); [desktop](screenshots/desktop.png) and [mobile](screenshots/mobile.png) were replaced with current captures.
 
+## Registry anatomy tree, 16 October 2026
+
+The hand-built structure list and its search field were replaced by the OrganUI registry `anatomy-tree` component ([integration record](REGISTRY_INTEGRATION.md)). Checked against a production build in headless Chromium (Playwright 1.56, SwiftShader WebGL) at 1440 × 900 and 390 × 844:
+
+- Panel closed by default; header **Anatomy** opens it and focus moves to the panel; Escape closes it and focus returns to the toggle.
+- Tree shows 4 group rows and 11 structure rows. Searching “aort” leaves Great vessels, Ascending aorta, and Aortic arch. Search matches labels only; the old list also matched source names and FMA IDs.
+- Selecting a structure row updates the selection chip, details card, and 3D emphasis; the view label stays **Anterior**. Clicking a group row label leaves the selection unchanged.
+- Hiding a leaf sets its group to Mixed and the count to 10 of 11; hiding a group hides its four vessels (7 of 11); showing one of them sets the group to Mixed. Isolate, Restore all, and tour isolation are reflected in the tree.
+- A 3D click selects the ventricular wall, the chip opens the panel, and the tree row is selected. After hiding the wall, clicking the same point selects the right ventricular cavity behind it: hidden structures are not pickable.
+- Reset clears tree search, selection, and visibility; all 15 rows return. Enter selects and Space toggles visibility on a focused row.
+- No console errors and no horizontal overflow at either size, with the panel closed or open.
+- Closed-panel, selection-chip, and About-dialog captures are pixel-identical to the previous build at both sizes, confirming the Tailwind preflight adjustments do not change the rest of the app.
+- `bun install --frozen-lockfile` (fresh `node_modules`), `bun run typecheck`, `bun run test` (10 tests), `bun run build`, and `bun run format:check` passed.
+
+No screen reader was used to test the tree. [Anatomy tree](screenshots/anatomy.png), [mobile anatomy tree](screenshots/anatomy-mobile.png), and [guided isolation](screenshots/guided-isolation.png) were recaptured; `desktop.png` and `mobile.png` show the unchanged closed-panel view.
+
 ## Visual artifacts
 
 - [Desktop](screenshots/desktop.png)
 - [Mobile](screenshots/mobile.png)
-- [Anatomy menu](screenshots/anatomy.png)
+- [Anatomy tree](screenshots/anatomy.png)
+- [Mobile anatomy tree](screenshots/anatomy-mobile.png)
 - [Camera view selector](screenshots/view-menu.png)
 - [Guided cavity isolation](screenshots/guided-isolation.png)
 
