@@ -23,6 +23,17 @@ describe('anatomy tree adapter', () => {
     )
   })
 
+  test('marks group rows as non-selectable and colours leaves like their meshes', () => {
+    for (const group of anatomyTree) {
+      expect(group.selectable).toBe(false)
+      expect(group.color).toBeUndefined()
+      for (const leaf of group.children!) {
+        expect(leaf.selectable).toBeUndefined()
+        expect(leaf.color).toBe(structures.find(({ id }) => id === leaf.id)!.color)
+      }
+    }
+  })
+
   test('maps group rows to their scene leaves and leaves to themselves', () => {
     expect(sceneIdsForNode('group-ventricular-cavities')).toEqual([
       'right-ventricle',

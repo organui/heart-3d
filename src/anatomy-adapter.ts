@@ -3,7 +3,9 @@ import { groups, structures } from './anatomy'
 
 // Scene-specific mapping between the explorer's structures and the registry
 // anatomy tree. Group rows are interface groupings taken from the existing
-// list headings; they do not claim anatomical containment.
+// list headings; they do not claim anatomical containment, so they are not
+// selectable: activating one expands or collapses it. Leaves carry the same
+// colour the 3D mesh uses.
 
 const structureIds = new Set(structures.map(({ id }) => id))
 
@@ -16,9 +18,10 @@ export function groupId(group: string): string {
 export const anatomyTree: readonly AnatomyNode[] = groups.map((group) => ({
   id: groupId(group),
   label: group,
+  selectable: false,
   children: structures
     .filter((structure) => structure.group === group)
-    .map(({ id, name }) => ({ id, label: name })),
+    .map(({ id, name, color }) => ({ id, label: name, color })),
 }))
 
 export const groupIds = anatomyTree.map(({ id }) => id)

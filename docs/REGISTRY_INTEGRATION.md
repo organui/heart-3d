@@ -4,21 +4,21 @@ The anatomy panel uses the OrganUI registry item `anatomy-tree`, installed with 
 
 ## Exact installation
 
-Installed on 2026-10-16:
+Reinstalled on 2026-10-16 (overwriting the earlier install from `master` commit 5e20c41):
 
 ```sh
-REGISTRY_URL=http://127.0.0.1:4410 bunx shadcn@4.21.0 add http://127.0.0.1:4410/anatomy-tree.json -y
+REGISTRY_URL=http://127.0.0.1:4411 bunx shadcn@4.21.0 add http://127.0.0.1:4411/anatomy-tree.json -y -o
 ```
 
-The install sandbox's network policy blocked `organui.com` and `ui.shadcn.com`. The item was therefore served from a local static server (`python3 -m http.server 4410`) holding the registry output built from the OrganUI repository at `master` commit **5e20c41**, plus shadcn's `colors/neutral.json` fetched from the shadcn GitHub repository. `REGISTRY_URL` points the CLI's own registry lookups at that server instead of `ui.shadcn.com`. With network access, the equivalent public command is `bunx shadcn@4.21.0 add https://organui.com/r/anatomy-tree.json -y`, but that public artifact was not fetched for this install and may differ from commit 5e20c41.
+The install sandbox's network policy blocked `organui.com` and `ui.shadcn.com`. The item was therefore served from a local static server (`python3 -m http.server 4411`) holding the registry output built from the OrganUI repository at commit **d6b36d0**, the head of organui PR #12 (not merged when this was installed), plus shadcn's `colors/neutral.json` fetched from the shadcn GitHub repository. `REGISTRY_URL` points the CLI's own registry lookups at that server instead of `ui.shadcn.com`. With network access, the equivalent public command is `bunx shadcn@4.21.0 add https://organui.com/r/anatomy-tree.json -y -o`. That public artifact was not fetched for this install; once PR #12 is merged and published, the public item must be re-verified against the checksums below (or reinstalled from it).
 
-| Artifact                                | SHA-256                                                            |
-| --------------------------------------- | ------------------------------------------------------------------ |
-| Served `anatomy-tree.json`              | `f519cf85a68142cb7a054f6b2472649d0dec188c5f2381d4315f12f631874a8e` |
-| Embedded `files[0].content`             | `65a226acc9c873559913611b4fadee51935e955ac63dcc64a8dc5bee2d12e821` |
-| Tracked `src/components/ui/anatomy-tree.tsx` | `39b294468f2fd06bb81b8c56f485828f941ddfc9065ea5c7c07fdf19582d1842` |
+| Artifact                                     | SHA-256                                                            |
+| -------------------------------------------- | ------------------------------------------------------------------ |
+| Served `anatomy-tree.json`                   | `32fbc477ece5f02ac135dbf0a5b4c059c37fc2ca9abc8982641b55c080cc9b30` |
+| Embedded `files[0].content`                  | `cb0ebd637b64a9813ba1139560315024b315580ad04e5df6eca3b3d1bb4844c0` |
+| Tracked `src/components/ui/anatomy-tree.tsx` | `dc14798adfbdcaef505cbe05e2ca92a6a3aae6164465d06e8d4d99cd415efab2` |
 
-The item declares `@base-ui/react@^1.8.0`. The CLI wrote `^1.8.0` to `package.json`; it was changed back to the exact `1.8.0` to match this repository's exact pins, and `bun install` refreshed the text `bun.lock`. Tailwind CSS and `@tailwindcss/vite` are pinned at 4.1.18, matching the kidney explorer.
+The item declares `@base-ui/react@^1.8.0`. The CLI again wrote `^1.8.0` to `package.json`; it was changed back to the exact `1.8.0` to match this repository's exact pins, and `bun install` left the text `bun.lock` unchanged. Tailwind CSS and `@tailwindcss/vite` are pinned at 4.1.18, matching the kidney explorer.
 
 ## Installed-source differences
 
@@ -26,13 +26,13 @@ The only difference from the published source is that the CLI removed the `"use 
 
 ## API used
 
-- `data`: four group rows, each with its structure leaves;
+- `data`: four group rows (`selectable: false`), each with its structure leaves (`color` set to the structure's mesh colour);
 - `selectedId` / `onSelectionChange`: the app's single controlled selection;
 - `visibility` / `onVisibilityChange`: a map keyed by leaf IDs, where a missing entry means visible;
 - `defaultExpandedIds`: all four groups, so the tree initially lists every structure like the old list;
 - `label="Heart anatomy"` and `className="registry-tree"`.
 
-Search and expansion stay internal to the component.
+Search and expansion stay internal to the component. The component's built-in reveal expands a collapsed group and scrolls the row into view when the selection changes to a row that is not shown, for example after a 3D pick or a tour step.
 
 ## Application adapter
 
@@ -47,16 +47,17 @@ Scene-specific logic lives in `src/anatomy-adapter.ts`, built from the existing 
 
 Groups are the headings the hand-built list already used. They are interface groupings only and do not claim anatomical containment (for example, the cavity surfaces are not "inside" the walls group). Every leaf ID is exactly one application structure ID and one GLB node.
 
-The adapter provides `anatomyTree`, `sceneIdsForNode`, `normalizeVisibility`, `visibilityFromHidden` / `hiddenFromVisibility` (the app keeps its existing `hidden` set and converts at the boundary), `isStructureId`, and `assertAnatomyMapping`, which runs at import and throws on missing, unknown, or duplicate leaves. `src/anatomy-adapter.test.ts` covers these with `bun test`.
+Leaves carry `color` from `structures` in `src/anatomy.ts`, the same value the renderer applies to the mesh material; group rows set `selectable: false`. The adapter provides `anatomyTree`, `sceneIdsForNode`, `normalizeVisibility`, `visibilityFromHidden` / `hiddenFromVisibility` (the app keeps its existing `hidden` set and converts at the boundary), `isStructureId`, and `assertAnatomyMapping`, which runs at import and throws on missing, unknown, or duplicate leaves. `src/anatomy-adapter.test.ts` covers these with `bun test`.
 
 ## Decisions
 
-- **Group rows do not select.** The renderer's emphasis, the details card, and the selection chip all describe exactly one structure, so multi-structure selection would not fit cleanly. Clicking or pressing Enter on a group row leaves the selection unchanged and announces that it is a grouping; group rows still expand/collapse and toggle the visibility of all their structures (showing `Mixed` when partly hidden).
+- **Group rows do not select.** The renderer's emphasis, the details card, and the selection chip all describe exactly one structure, so multi-structure selection would not fit cleanly. Group rows are `selectable: false`: clicking the label or pressing Enter expands or collapses them, they carry no `aria-selected`, and the selection is unchanged. They still toggle the visibility of all their structures (showing `Mixed` when partly hidden). `onSelectionChange` keeps only a one-line guard that ignores IDs that are not structures.
+- **Colour swatches**: each structure row shows the component's swatch in the structure's mesh colour, restoring the colour dots of the hand-built list.
 - **Visibility** stays the app's `hidden` set. Tree changes, the detail-card Hide/Show, Isolate, Restore all, the guided tour, and Reset all write that one set.
 - **Reset** increments the tree's React `key`, remounting it to clear its internal search and expansion along with selection, visibility, tour, and camera.
 - **Search** matches row labels only (the component's behaviour). The old list also matched source names and FMA identifiers; FMA IDs remain visible in the details card. Search is no longer cleared on 3D selection or tour steps, because the component does not expose its query; Reset clears it.
 - **Hidden structures are not pickable.** `src/picking.ts` already ignores intersections with invisible meshes or their descendants, so hidden foreground anatomy neither selects itself nor blocks visible surfaces behind it. Hidden structures remain selectable through the tree.
-- The app keeps the selected row scrolled into view inside the tree's scroll area, as the old list did.
+- **Reveal**: the app's own scroll-into-view effect for selection changes was removed in favour of the component's reveal. One narrow effect remains: when the panel opens, the app scrolls an already-selected row into the tree's own scroll area. A selection made while the panel is closed happens while the tree is `display: none`, so the component's reveal has nothing to scroll then and does not run again on open. This effect only adjusts the tree's `scrollTop` and never moves the page.
 - Unchanged: selected structure glows in its colour at 0.35 emissive with others ghosted; clicking a structure does not change the view label to "Custom view"; panel closed by default and opened from the header; focus moves into the panel and returns to the toggle on Escape/close; chip name opens the panel; toolbar order is view menu, zoom in, zoom out, reset. `src/framing.ts` was not touched.
 
 ## Theme setup
@@ -67,12 +68,12 @@ As in the kidney explorer, the app's global resets moved into `@layer base` afte
 
 ## Friction and observations
 
-No registry defect blocked the integration and the component was not modified.
+No registry defect blocked the integration and the component was not modified. Resolved by organui PR #12: group rows no longer need app-side handling of group selection callbacks (`selectable: false`), colour dots are available again (`color`), and remount/scroll workarounds for revealing a selection are no longer needed (built-in reveal).
 
 1. The CLI loosened the exact dependency pin to `^1.8.0`; consumers with exact pins need to restore them.
-2. Search and expansion are internal. Clearing them needs a remount; the app also cannot clear search when a 3D selection would otherwise be filtered out of view.
+2. Search and expansion are internal. Clearing them needs a remount (Reset does this). A selection hidden by an active search query is not revealed, because reveal only expands ancestors.
 3. The search box has no placeholder or icon prop, so the visible label and the CSS search glyph carry that role.
-4. Selection callbacks fire for group rows too; a consumer whose selection is leaf-only must ignore them, which leaves the group label button without a visible effect.
-5. Row labels are plain text, so the old per-structure colour dots could not be kept without changing the component.
+4. The built-in reveal calls `scrollIntoView({ block: "nearest" })`, which scrolls every scrollable ancestor, not just the tree. On phones, where the panel sits below the model, picking a structure in 3D while the panel is open scrolls the page down to the tree row (about 550 px at 390 x 844). Desktop is unaffected (the panel is in view). Scrolling only the tree's own container would avoid this; the app does not work around it.
+5. Reveal runs only when `selectedId` changes, so a selection made while the tree is hidden is not scrolled into view when it is shown again (see Reveal above).
 
 Screen-reader testing of the tree was not done.

@@ -47,16 +47,19 @@ export default function App() {
   const [treeKey, setTreeKey] = useState(0)
   const current = selected ? byId[selected] : null
   const visibleCount = structures.length - hidden.size
-  // Keep the selected row in view inside the scrolling tree, without moving the page.
+  // The tree reveals selections made while it is shown. One made while the
+  // panel was closed (hidden tree, nothing to scroll) is brought into the tree's
+  // own scroll area when the panel opens, without moving the page.
   useLayoutEffect(() => {
+    if (!sidebarOpen) return
     const tree = anatomyPanel.current?.querySelector<HTMLElement>('[role="tree"]')
     const row = tree?.querySelector<HTMLElement>('[role="treeitem"][aria-selected="true"]')
-    if (!tree || !row || tree.scrollHeight <= tree.clientHeight) return
+    if (!tree || !row) return
     const bounds = tree.getBoundingClientRect(),
       item = row.getBoundingClientRect()
     if (item.top < bounds.top) tree.scrollTop += item.top - bounds.top
     else if (item.bottom > bounds.bottom) tree.scrollTop += item.bottom - bounds.bottom
-  }, [selected, step, sidebarOpen])
+  }, [sidebarOpen])
 
   useLayoutEffect(() => {
     if (!sidebarOpen || !focusPanel.current) return
@@ -88,13 +91,10 @@ export default function App() {
     )
   }
   // Selection stays a single structure: the renderer, detail card, and chip
-  // describe one structure. Group rows only expand/collapse and toggle visibility.
+  // describe one structure. Group rows are not selectable (they expand or
+  // collapse); the guard only drops unknown IDs.
   function choose(id: string) {
     if (isStructureId(id)) select(id)
-    else
-      setAnnouncement(
-        `${anatomyTree.find((group) => group.id === id)?.label ?? 'Group'} is a grouping. Choose a structure within it to select.`,
-      )
   }
   function changeVisibility(visibility: Record<string, boolean>) {
     const next = hiddenFromVisibility(visibility)

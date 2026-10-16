@@ -35,7 +35,7 @@ The app is static and uses relative build paths. `dist/` can later be hosted on 
 - The heart opens centered on a neutral canvas. Expand **Anatomy** to browse structures; collapse it to return to the full-width view.
 - Drag to rotate; scroll or pinch to zoom. The gesture hint fades after the first rotation or zoom and stays hidden until the page reloads.
 - Open the camera view selector for anterior, posterior, and left lateral presets. Manual rotation changes its label to **Custom view**; zooming preserves the view name. Use arrow keys to navigate the menu, Enter to select, and Escape to close it.
-- Select a mesh or use the anatomy tree (the OrganUI registry `anatomy-tree` component). The tree searches structure and group labels; group rows expand/collapse and show or hide all their structures (showing **Mixed** when partly hidden). Selection is always a single structure; selection, highlighting, and descriptions stay synchronized. See [registry integration](docs/REGISTRY_INTEGRATION.md).
+- Select a mesh or use the anatomy tree (the OrganUI registry `anatomy-tree` component). The tree searches structure and group labels; each structure shows the colour of its 3D mesh. Group rows are not selectable: clicking or pressing Enter expands/collapses them, and their visibility button shows or hides all their structures (showing **Mixed** when partly hidden). A structure picked in 3D inside a collapsed group is revealed in the tree. Selection is always a single structure; selection, highlighting, and descriptions stay synchronized. See [registry integration](docs/REGISTRY_INTEGRATION.md).
 - Isolate a structure, hide it, or restore all. **Reset explorer** restores the anterior camera, zoom, visibility, selection, tree search/expansion, and tour state.
 - Follow five guided stops, including an isolated ventricular cavity and the heart's coronary supply.
 - On mobile, **Anatomy** opens the tree below the model; **View in 3D** closes it and returns to the heart. Selection and search survive closing/reopening the panel.
@@ -47,7 +47,7 @@ The app is static and uses relative build paths. `dist/` can later be hosted on 
 <details>
 <summary>Anatomy menu, mobile, and guided exploration screenshots</summary>
 
-![Anatomy tree with the ventricular wall selected](docs/screenshots/anatomy.png)
+![Anatomy tree with the aortic arch selected](docs/screenshots/anatomy.png)
 
 <img src="docs/screenshots/mobile.png" alt="Mobile heart explorer" width="300" />
 

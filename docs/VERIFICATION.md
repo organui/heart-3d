@@ -73,6 +73,22 @@ The hand-built structure list and its search field were replaced by the OrganUI 
 
 No screen reader was used to test the tree. [Anatomy tree](screenshots/anatomy.png), [mobile anatomy tree](screenshots/anatomy-mobile.png), and [guided isolation](screenshots/guided-isolation.png) were recaptured; `desktop.png` and `mobile.png` show the unchanged closed-panel view.
 
+## Anatomy tree options, 16 October 2026
+
+The registry `anatomy-tree` was reinstalled from organui PR #12 (commit d6b36d0, served locally; see the [integration record](REGISTRY_INTEGRATION.md)) to use its new `color`, `selectable`, and reveal behaviour. Checked against a production build in headless Chromium (Playwright 1.56, SwiftShader WebGL) at 1440 × 900 and 390 × 844:
+
+- All 11 structure rows show a swatch whose computed colour equals the structure's mesh colour; the 4 group rows have no swatch and no `aria-selected`.
+- Clicking a group label, or pressing Enter on a focused group row, collapses/expands it and leaves the selection unchanged.
+- With Great vessels collapsed, a 3D click on the pulmonary trunk expands the group, selects the row, and scrolls it into the tree's visible area. On desktop the page does not move; on mobile the component's reveal also scrolls the page down to the row (recorded as friction).
+- A structure picked in 3D with the panel closed is scrolled into the tree's view when the panel opens.
+- Searching “aort” and selecting Ascending aorta works; hiding a leaf gives Mixed and 10 of 11; group hide gives 7 of 11; showing one of its leaves gives Mixed and 8 of 11.
+- Reset clears search, expansion, visibility, and selection (15 rows, 11 of 11 visible, view **Anterior**). A 3D click keeps the view label at **Anterior**.
+- Panel closed by default; the chip and header toggle open it with focus moved into the panel; Escape closes it and returns focus to the toggle. Toolbar order: view menu, zoom in, zoom out, reset.
+- No console errors and no horizontal overflow at either size.
+- `bun install --frozen-lockfile` (fresh `node_modules`), `bun run typecheck`, `bun run test` (11 tests), `bun run build`, and `bun run format:check` passed.
+
+[Anatomy tree](screenshots/anatomy.png), [mobile anatomy tree](screenshots/anatomy-mobile.png), and [guided isolation](screenshots/guided-isolation.png) were recaptured.
+
 ## Visual artifacts
 
 - [Desktop](screenshots/desktop.png)
